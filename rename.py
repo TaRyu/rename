@@ -1,5 +1,13 @@
-import os
+import os,os.path
 import re
+
+class FindFiles():
+	"""docstring for FindFile"""
+	def __init__(self,path):
+		self.path = os.path.normpath(path)
+
+	def 
+
 
 def myrename(path,houzhui):
 	nowName = os.listdir(path)
