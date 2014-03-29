@@ -3,7 +3,7 @@ import os,os.path
 import re
 import shutil
 from tkinter import *
-from tkinter.filedialog import askdirectory
+from tkinter.filedialog import askdirectory,askopenfilename,font
 
 class FindFiles():
 	"""docstring for FindFile"""
@@ -75,22 +75,36 @@ class App(Frame):
 		# self.master.title("Example")
 		# self.master.rowconfigure(5, weight=1)
 		# self.master.columnconfigure(5, weight=1)
+
 		self.grid(sticky=W+E+N+S)
-		self.button1 = Button(self, text="浏览文件夹", command=self.load_dir, width=10)
+		self.button1 = Button(self, text="浏览文件夹", command=self.load_dir, width=30)
 		self.button1.grid(row=0, column=0, sticky=W)
 
-		self.entry1 = Entry(self,width = 60)
+		self.dirname = StringVar()
+		self.entry1 = Entry(self, textvariable = self.dirname, width = 60)
 		self.entry1.grid(row = 1, column = 0)
 
-		self.button2 = Button(self, text="选择字典键", command=self.load_dir, width=10)
+		self.button2 = Button(self, text="选择字典键（可选）", command=self.load_keyfile, width=30)
 		self.button2.grid(row=2, column=0, sticky=W)
-		self.button2 = Button(self, text="选择字典值", command=self.load_dir, width=10)
-		self.button2.grid(row=2, column=1)
 
 		self.entry2 = Entry(self,width = 60)
 		self.entry2.grid(row = 3, column = 0)
+
+		self.button3 = Button(self, text="选择字典值（可选）", command=self.load_valusefile, width=30)
+		self.button3.grid(row=4, column=0,sticky = W)
+
 		self.entry3 = Entry(self,width = 60)
-		self.entry3.grid(row = 4, column = 0)
+		self.entry3.grid(row = 5, column = 0)
+
+		self.label1 = Label(self,text = "正则表达式")
+		self.label1.grid(row = 6,column = 0)
+
+		self.pattern = StringVar()
+		self.entry4 = Entry(self,  textvariable = self.pattern, width = 60)
+		self.entry4.grid(row = 7, column = 0)
+
+		self.buttonx = Button(self, text="X", command=self.run, width=10)
+		self.buttonx.grid(row=8, column=0,sticky = W)
 
 	def load_dir(self):
 		self.entry1.delete(0,END)
@@ -100,11 +114,27 @@ class App(Frame):
 			self.entry1.insert(0,fname)
 
 	def load_keyfile(self):
-		self.entry1.delete(0,END)
-		global keys
-		keys = askopenfilname()
-		if keys:
-			self.entry2.insert(0,keys)
+		self.entry2.delete(0,END)
+		global gl_keys
+		gl_keys = askopenfilename()
+		if gl_keys:
+			self.entry2.insert(0,gl_keys)
+
+	def load_valusefile(self):
+		self.entry3.delete(0,END)
+		global gl_values
+		gl_values = askopenfilename()
+		if gl_values:
+			self.entry3.insert(0,gl_values)
+
+	def run(self):
+		if self.dirname.get():
+			findfiles = FindFiles(self.dirname)
+		else:
+			top = Toplevel()
+			top.geometry('300x30')
+			top.title('错误')
+			label_top = Label(top,text = '未选择文件夹或文件夹不存在',font = 30,fg = 'red',bg = 'blue').pack(fill = 'both')
 
 
 
