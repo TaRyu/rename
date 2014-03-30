@@ -11,18 +11,18 @@ class FindFiles():
 		self.path = os.path.normpath(path)
 
 	def traversal_all(self):
-		temp_list = []
+		temp_list = [[],[]]
 		file_list = os.walk(self.path)
 
 		for root,dirs,files in file_list:
 			for f in files:
-				f = os.path.join(root,f)
-				temp_list.append(f)
+				temp_list[0].append(f)
+				temp_list[1].append(root)
 
 		return temp_list
 
 	def traversal_current(self):
-		temp_list = []
+		temp_list = [[],[]]
 		file_list = os.listdir(self.path)
 
 		for l in file_list:
@@ -87,13 +87,15 @@ class App(Frame):
 		self.button2 = Button(self, text="选择字典键（可选）", command=self.load_keyfile, width=30)
 		self.button2.grid(row=2, column=0, sticky=W)
 
-		self.entry2 = Entry(self,width = 60)
+		self.keys = StringVar()
+		self.entry2 = Entry(self,textvariable = self.keys, width = 60)
 		self.entry2.grid(row = 3, column = 0)
 
 		self.button3 = Button(self, text="选择字典值（可选）", command=self.load_valusefile, width=30)
 		self.button3.grid(row=4, column=0,sticky = W)
 
-		self.entry3 = Entry(self,width = 60)
+		self.values = StringVar()
+		self.entry3 = Entry(self,textvariable = self.values, width = 60)
 		self.entry3.grid(row = 5, column = 0)
 
 		self.label1 = Label(self,text = "正则表达式")
@@ -103,33 +105,64 @@ class App(Frame):
 		self.entry4 = Entry(self,  textvariable = self.pattern, width = 60)
 		self.entry4.grid(row = 7, column = 0)
 
+		self.button4 = Button(self, text="插入字典", command=self.insert_dict, width=10)
+		self.button4.grid(row=8, column=0,sticky = W)
+
+		self.rename = StringVar()
+		self.entry5 = Entry(self,  textvariable = self.rename, width = 60)
+		self.entry5.grid(row = 9, column = 0)
+
 		self.buttonx = Button(self, text="X", command=self.run, width=10)
-		self.buttonx.grid(row=8, column=0,sticky = W)
+		self.buttonx.grid(row=10, column=0)
 
 	def load_dir(self):
 		self.entry1.delete(0,END)
-		global fname
 		fname = askdirectory()
 		if fname:
 			self.entry1.insert(0,fname)
 
 	def load_keyfile(self):
 		self.entry2.delete(0,END)
-		global gl_keys
 		gl_keys = askopenfilename()
 		if gl_keys:
 			self.entry2.insert(0,gl_keys)
 
 	def load_valusefile(self):
 		self.entry3.delete(0,END)
-		global gl_values
 		gl_values = askopenfilename()
 		if gl_values:
 			self.entry3.insert(0,gl_values)
 
+	def insert_dict(self):
+		if self.keys.get() and self.values.get():
+			self.entry5.insert(0,'字典')
+		else:
+			top = Toplevel()
+			top.geometry('300x30')
+			top.title('错误')
+			label_top = Label(top,text = '未选择文件夹或文件夹不存在',font = 30,fg = 'red',bg = 'blue').pack(fill = 'both')
+
+
 	def run(self):
+		if self.keys.get() and self.values.get():
+			mydict = Dict(self.keys,self.values)
+
 		if self.dirname.get():
-			findfiles = FindFiles(self.dirname)
+			findfiles = FindFiles(self.dirname.get())
+			sourse_list = findfiles.traversal_all()
+			temp_list = []
+			for i in range(len(sourse_list[0])):
+				temp = sourse_list[0][i]
+				regular = Regular(self.pattern.get(),temp)
+				# temp_list.append(regular.findall()[0])
+				shutil.copy(os.path.join(sourse_list[1][i],sourse_list[0][i]),'test/'+regular.findall()[0])
+
+			top = Toplevel()
+			top.geometry('300x30')
+			top.title('成功')
+			label_top = Label(top,text = '重命名完成',font = 30,fg = 'green',bg = 'black').pack(fill = 'both')
+
+				
 		else:
 			top = Toplevel()
 			top.geometry('300x30')
