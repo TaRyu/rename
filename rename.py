@@ -2,8 +2,9 @@
 import os,os.path
 import re
 import shutil
+import time
 from tkinter import *
-from tkinter.filedialog import askdirectory,askopenfilename,font
+from tkinter.filedialog import askdirectory,askopenfilename
 
 class FindFiles():
 	"""docstring for FindFile"""
@@ -105,8 +106,13 @@ class App(Frame):
 		self.entry4 = Entry(self,  textvariable = self.pattern, width = 60)
 		self.entry4.grid(row = 7, column = 0)
 
+		self.label2 = Label(self,text = "重命名格式")
+		self.label2.grid(row = 8,column = 0)
 		self.button4 = Button(self, text="插入字典", command=self.insert_dict, width=10)
-		self.button4.grid(row=8, column=0,sticky = W)
+		self.button4.grid(row=8, column=0, sticky = W)
+
+		self.button5 = Button(self, text="插入正则结果", command=self.insert_re, width=10)
+		self.button5.grid(row=8, column=0, sticky = E)
 
 		self.rename = StringVar()
 		self.entry5 = Entry(self,  textvariable = self.rename, width = 60)
@@ -142,20 +148,38 @@ class App(Frame):
 			top.title('错误')
 			label_top = Label(top,text = '未选择文件夹或文件夹不存在',font = 30,fg = 'red',bg = 'blue').pack(fill = 'both')
 
+	def insert_re(self):
+		if self.pattern.get():
+			self.entry5.insert(0,'正则')
+		else:
+			top = Toplevel()
+			top.geometry('300x30')
+			top.title('错误')
+			label_top = Label(top,text = '正则表达式未写',font = 30,fg = 'red',bg = 'blue').pack(fill = 'both')
+
 
 	def run(self):
 		if self.keys.get() and self.values.get():
-			mydict = Dict(self.keys,self.values)
+			mydict = Dict(self.keys.get(),self.values.get())
+			the_dict = mydict.createDict()
 
 		if self.dirname.get():
 			findfiles = FindFiles(self.dirname.get())
 			sourse_list = findfiles.traversal_all()
 			temp_list = []
+			newname = self.rename.get()
+			filename = str(int(time.time()))
 			for i in range(len(sourse_list[0])):
 				temp = sourse_list[0][i]
 				regular = Regular(self.pattern.get(),temp)
+
+				mypattern = regular.findall()[0]
+
+				newname = self.rename.get().replace('正则',mypattern)
+				if self.keys.get() and self.values.get():
+					newname = newname.replace('字典',the_dict[mypattern])
 				# temp_list.append(regular.findall()[0])
-				shutil.copy(os.path.join(sourse_list[1][i],sourse_list[0][i]),'test/'+regular.findall()[0])
+				shutil.copy(os.path.join(sourse_list[1][i],sourse_list[0][i]),filename+'/'+newname)
 
 			top = Toplevel()
 			top.geometry('300x30')
